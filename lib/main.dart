@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:welldone/screens/webview_screen.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const MyApp());
 }
 
