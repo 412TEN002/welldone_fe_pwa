@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:welldone/controller/timer_controller.dart';
@@ -15,7 +16,8 @@ class _WebViewScreenState extends State<WebViewScreen> {
   late final WebViewController _controller;
 
   final TimerController _timerController = TimerController();
-  final NotificationController _notificationController = NotificationController();
+  final NotificationController _notificationController =
+      NotificationController();
   final TTSController _ttsController = TTSController();
 
   @override
@@ -31,11 +33,12 @@ class _WebViewScreenState extends State<WebViewScreen> {
       ..addJavaScriptChannel("TimerRequestChannel",
           onMessageReceived: (message) {
         final command = message.message.split(":");
-        if(command.isNotEmpty) {
-          switch(command[0]){
+        if (command.isNotEmpty) {
+          switch (command[0]) {
             case "start":
               final time = int.tryParse(command[1]) ?? 0;
-              _timerController.startTimer(time, _updateWebViewTimer, onComplete: _onTimerComplete);
+              _timerController.startTimer(time, _updateWebViewTimer,
+                  onComplete: _onTimerComplete);
               break;
             case "pause":
               _timerController.pauseTimer();
@@ -51,7 +54,13 @@ class _WebViewScreenState extends State<WebViewScreen> {
           }
         }
       })
-      ..loadRequest(Uri.parse("https://ssss-test.vercel.app/"));
+      ..runJavaScript('''
+        var meta = document.createElement('meta');
+        meta.name = 'viewport';
+        meta.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no';
+        document.head.appendChild(meta);
+      ''')
+      ..loadRequest(Uri.parse("https://welldone-fe-next-app.vercel.app/"));
   }
 
   void _updateWebViewTimer(int remainingTime) {
@@ -72,6 +81,13 @@ class _WebViewScreenState extends State<WebViewScreen> {
 
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+      statusBarColor: Color(0xFF3C3731),
+      statusBarIconBrightness: Brightness.light,
+      systemNavigationBarColor: Color(0xFF3C3731),
+      systemNavigationBarIconBrightness: Brightness.light,
+    ));
+
     return Scaffold(
       body: SafeArea(child: WebViewWidget(controller: _controller)),
     );
