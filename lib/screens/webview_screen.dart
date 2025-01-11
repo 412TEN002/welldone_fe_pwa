@@ -1,8 +1,8 @@
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:webview_flutter/webview_flutter.dart';
-import 'package:flutter/material.dart';
-import 'package:welldone/controller/timer_controller.dart';
 import 'package:welldone/controller/notification_controller.dart';
+import 'package:welldone/controller/timer_controller.dart';
 import 'package:welldone/controller/tts_controller.dart';
 
 class WebViewScreen extends StatefulWidget {
@@ -81,15 +81,28 @@ class _WebViewScreenState extends State<WebViewScreen> {
 
   @override
   Widget build(BuildContext context) {
-    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+    SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
       statusBarColor: Color(0xFF3C3731),
       statusBarIconBrightness: Brightness.light,
       systemNavigationBarColor: Color(0xFF3C3731),
       systemNavigationBarIconBrightness: Brightness.light,
     ));
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 
     return Scaffold(
-      body: SafeArea(child: WebViewWidget(controller: _controller)),
+      resizeToAvoidBottomInset: false,
+      body: SafeArea(
+        minimum: EdgeInsets.zero,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return SizedBox(
+              width: constraints.maxWidth,
+              height: constraints.maxHeight,
+              child: WebViewWidget(controller: _controller),
+            );
+          },
+        ),
+      ),
     );
   }
 }
