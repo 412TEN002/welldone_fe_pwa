@@ -19,6 +19,7 @@ class _WebViewScreenState extends State<WebViewScreen> {
   final NotificationController _notificationController =
       NotificationController();
   final TTSController _ttsController = TTSController();
+  bool _isLoading = true;
 
   @override
   void initState() {
@@ -60,7 +61,21 @@ class _WebViewScreenState extends State<WebViewScreen> {
         meta.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no';
         document.head.appendChild(meta);
       ''')
-      ..loadRequest(Uri.parse("https://welldone-fe-next-app.vercel.app/"));
+      ..loadRequest(Uri.parse("https://welldone-fe-next-app.vercel.app/"))
+      ..setNavigationDelegate(
+        NavigationDelegate(
+          onPageStarted: (_) {
+            setState(() {
+              _isLoading = true;
+            });
+          },
+          onPageFinished: (_) {
+            setState(() {
+              _isLoading = false;
+            });
+          },
+        ),
+      );
   }
 
   void _updateWebViewTimer(int remainingTime) {
@@ -93,14 +108,22 @@ class _WebViewScreenState extends State<WebViewScreen> {
       resizeToAvoidBottomInset: false,
       body: SafeArea(
         minimum: EdgeInsets.zero,
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            return SizedBox(
-              width: constraints.maxWidth,
-              height: constraints.maxHeight,
-              child: WebViewWidget(controller: _controller),
-            );
-          },
+        child: Stack(
+          children: [
+            LayoutBuilder(
+              builder: (context, constraints) {
+                return SizedBox(
+                  width: constraints.maxWidth,
+                  height: constraints.maxHeight,
+                  child: WebViewWidget(controller: _controller),
+                );
+              },
+            ),
+            if (_isLoading)
+              Center(
+                child: CircularProgressIndicator(),
+              ),
+          ],
         ),
       ),
     );
