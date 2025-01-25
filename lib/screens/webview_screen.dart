@@ -61,7 +61,8 @@ class _WebViewScreenState extends State<WebViewScreen> {
         meta.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no';
         document.head.appendChild(meta);
       ''')
-      ..loadRequest(Uri.parse("https://welldone-fe-next-app.vercel.app/"))
+      ..loadRequest(Uri.parse("https://welldone-fe-next-app-one.vercel.app/"))
+      ..loadRequest(Uri.parse("http://localhost:3000"))
       ..setNavigationDelegate(
         NavigationDelegate(
           onPageStarted: (_) {
@@ -106,24 +107,27 @@ class _WebViewScreenState extends State<WebViewScreen> {
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      body: SafeArea(
-        minimum: EdgeInsets.zero,
-        child: Stack(
-          children: [
-            LayoutBuilder(
-              builder: (context, constraints) {
-                return SizedBox(
-                  width: constraints.maxWidth,
-                  height: constraints.maxHeight,
-                  child: WebViewWidget(controller: _controller),
-                );
-              },
-            ),
-            if (_isLoading)
-              Center(
-                child: CircularProgressIndicator(),
+      body: Container(
+        color: const Color(0xFF3C3731),
+        child: SafeArea(
+          minimum: EdgeInsets.zero,
+          child: Stack(
+            children: [
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  return SizedBox(
+                    width: constraints.maxWidth,
+                    height: constraints.maxHeight,
+                    child: WebViewWidget(controller: _controller),
+                  );
+                },
               ),
-          ],
+              if (_isLoading)
+                const Center(
+                  child: CircularProgressIndicator(),
+                ),
+            ],
+          ),
         ),
       ),
     );
