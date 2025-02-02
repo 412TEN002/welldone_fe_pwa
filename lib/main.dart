@@ -1,8 +1,17 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
-import 'package:welldone/screens/webview_screen.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
+import 'package:welldoness/screens/webview_screen.dart';
 
 void main() {
-  WidgetsFlutterBinding.ensureInitialized();
+  WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
+
+  Timer(const Duration(seconds: 1), () {
+    FlutterNativeSplash.remove();
+  });
+
   runApp(const MyApp());
 }
 
@@ -18,7 +27,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.white54),
         useMaterial3: true,
       ),
-      home: const WebViewScreen()
+      home: const WebViewScreen(),
     );
   }
 }

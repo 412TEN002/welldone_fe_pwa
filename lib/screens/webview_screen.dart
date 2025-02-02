@@ -1,9 +1,9 @@
+import 'dart:convert';
+
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:webview_flutter/webview_flutter.dart';
-import 'package:welldone/controller/notification_controller.dart';
-import 'package:welldone/controller/timer_controller.dart';
-import 'package:welldone/controller/tts_controller.dart';
 
 class WebViewScreen extends StatefulWidget {
   const WebViewScreen({super.key});
@@ -14,16 +14,19 @@ class WebViewScreen extends StatefulWidget {
 
 class _WebViewScreenState extends State<WebViewScreen> {
   late final WebViewController _controller;
+  late AudioPlayer player = AudioPlayer();
 
-  final TimerController _timerController = TimerController();
-  final NotificationController _notificationController =
-      NotificationController();
-  final TTSController _ttsController = TTSController();
   bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
+    player = AudioPlayer()..setReleaseMode(ReleaseMode.stop);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await player.setSource(AssetSource('end_sound.mp3'));
+    });
+
     _initWebView();
   }
 
@@ -31,28 +34,32 @@ class _WebViewScreenState extends State<WebViewScreen> {
     _controller = WebViewController();
     _controller
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..addJavaScriptChannel("TimerRequestChannel",
+      ..addJavaScriptChannel("TimerStatusChannel",
           onMessageReceived: (message) {
-        final command = message.message.split(":");
-        if (command.isNotEmpty) {
-          switch (command[0]) {
-            case "start":
-              final time = int.tryParse(command[1]) ?? 0;
-              _timerController.startTimer(time, _updateWebViewTimer,
-                  onComplete: _onTimerComplete);
+        try {
+          final Map<String, dynamic> data = jsonDecode(message.message);
+
+          final String status = data['status'];
+
+          switch (status) {
+            case "play":
+              // 재생 중일 때의 처리
               break;
             case "pause":
-              _timerController.pauseTimer();
+              // 일시정지 상태일 때의 처리
               break;
             case "resume":
-              _timerController.resumeTimer();
+              break;
+            case "end":
+              player.resume();
+              // 종료 상태일 때의 처리
               break;
             case "reset":
-              final time = int.tryParse(command[1]) ?? 0;
-              _timerController.resetTimer(time);
-              _updateWebViewTimer(time);
+              // 리셋 상태일 때의 처리
               break;
           }
+        } catch (e) {
+          print('Error parsing message: $e');
         }
       })
       ..runJavaScript('''
@@ -73,24 +80,15 @@ class _WebViewScreenState extends State<WebViewScreen> {
             setState(() {
               _isLoading = false;
             });
+            _controller.clearCache();
           },
         ),
       );
   }
 
-  void _updateWebViewTimer(int remainingTime) {
-    _controller.runJavaScript('window.updateTimer($remainingTime);');
-  }
-
-  void _onTimerComplete() async {
-    await _notificationController.showNotification("타이머 완료", "타이머가 종료되었습니다!");
-    await _ttsController.speak("타이머가 종료되었습니다!");
-  }
-
   @override
   void dispose() {
-    _timerController.dispose();
-    _ttsController.stop();
+    player.dispose();
     super.dispose();
   }
 
@@ -105,11 +103,12 @@ class _WebViewScreenState extends State<WebViewScreen> {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 
     return Scaffold(
+      backgroundColor: const Color(0xFF3C3731),
       resizeToAvoidBottomInset: false,
-      body: Container(
-        color: const Color(0xFF3C3731),
-        child: SafeArea(
-          minimum: EdgeInsets.zero,
+      body: SafeArea(
+        minimum: EdgeInsets.zero,
+        child: Container(
+          color: const Color(0xFF3C3731),
           child: Stack(
             children: [
               LayoutBuilder(
@@ -122,8 +121,13 @@ class _WebViewScreenState extends State<WebViewScreen> {
                 },
               ),
               if (_isLoading)
-                const Center(
-                  child: CircularProgressIndicator(),
+                Container(
+                  color: const Color(0xFF3C3731),
+                  child: const Center(
+                    child: CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    ),
+                  ),
                 ),
             ],
           ),
