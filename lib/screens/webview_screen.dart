@@ -62,7 +62,6 @@ class _WebViewScreenState extends State<WebViewScreen> {
         document.head.appendChild(meta);
       ''')
       ..loadRequest(Uri.parse("https://welldone-fe-next-app-one.vercel.app/"))
-      ..loadRequest(Uri.parse("http://localhost:3000"))
       ..setNavigationDelegate(
         NavigationDelegate(
           onPageStarted: (_) {
