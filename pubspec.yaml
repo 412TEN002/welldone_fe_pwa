@@ -21,6 +21,8 @@ version: 1.0.0+1
 environment:
   sdk: ^3.5.3
 
+platforms:
+  ios: null
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
 # consider running `flutter pub upgrade --major-versions`. Alternatively,
@@ -38,7 +40,6 @@ dependencies:
   webview_flutter: ^4.10.0
   flutter_tts: ^4.2.0
   flutter_background: ^1.0.0
-  flutter_local_notifications: ^18.0.1
   flutter_native_splash: ^2.4.4
   audioplayers: ^6.1.1
 

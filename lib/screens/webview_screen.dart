@@ -68,7 +68,6 @@ class _WebViewScreenState extends State<WebViewScreen> {
         meta.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no';
         document.head.appendChild(meta);
       ''')
-      ..loadRequest(Uri.parse("https://welldone-fe-next-app-one.vercel.app/"))
       ..setNavigationDelegate(
         NavigationDelegate(
           onPageStarted: (_) {
