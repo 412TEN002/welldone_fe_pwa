@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 class WebViewScreen extends StatefulWidget {
@@ -31,14 +30,17 @@ class _WebViewScreenState extends State<WebViewScreen> {
   }
 
   void _initWebView() {
+    final WebViewCookieManager cookieManager = WebViewCookieManager();
+    cookieManager.clearCookies();
+
     _controller = WebViewController();
     _controller
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..enableZoom(false) // 줌 기능 비활성화
       ..addJavaScriptChannel("TimerStatusChannel",
           onMessageReceived: (message) {
         try {
           final Map<String, dynamic> data = jsonDecode(message.message);
-
           final String status = data['status'];
 
           switch (status) {
@@ -94,14 +96,6 @@ class _WebViewScreenState extends State<WebViewScreen> {
 
   @override
   Widget build(BuildContext context) {
-    SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-      statusBarColor: Color(0xFF3C3731),
-      statusBarIconBrightness: Brightness.light,
-      systemNavigationBarColor: Color(0xFF3C3731),
-      systemNavigationBarIconBrightness: Brightness.light,
-    ));
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-
     return Scaffold(
       backgroundColor: const Color(0xFF3C3731),
       resizeToAvoidBottomInset: false,
